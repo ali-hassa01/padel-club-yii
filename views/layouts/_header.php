@@ -9,18 +9,25 @@ use yii\bootstrap5\NavBar;
 use yii\helpers\Html;
 
 $items = [
-    [
-        'label' => 'Home',
-        'url' => ['/site/index'],
-    ],
-    [
-        'label' => 'About',
-        'url' => ['/site/about'],
-    ],
-    [
-        'label' => 'Contact',
-        'url' => ['/site/contact'],
-    ],
+                    ['label' => 'Courts', 'url' => ['/court/index']],
+                    ['label' => 'Book a Court', 'url' => ['/book/index']],
+                    ['label' => 'Matches', 'url' => ['/match/index']],
+                    ['label' => 'Ladder', 'url' => ['/ladder/index']],
+                    ['label' => 'My Loyalty', 'url' => ['/loyalty/index']],
+                    ['label' => 'My Dashboard', 'url' => ['/profile/index']],
+                    
+                                        !Yii::$app->user->isGuest && Yii::$app->user->identity->isAdmin() ? [
+                        'label' => 'Admin',
+                        'items' => [
+                            ['label' => 'Players', 'url' => ['/player/index']],
+                            ['label' => 'Matches', 'url' => ['/match-admin/index']],
+                            ['label' => 'Teams', 'url' => ['/team-admin/index']],
+                            ['label' => 'Ladder Entries', 'url' => ['/ladder-admin/index']],
+                            ['label' => 'Loyalty Records', 'url' => ['/loyalty-admin/index']],
+                            ['label' => 'Rules & Settings', 'url' => ['/settings/index']],
+                        ],
+                    ] : ['label' => '', 'visible' => false],
+                                         
     [
         'label' => 'Login',
         'url' => ['/site/login'],

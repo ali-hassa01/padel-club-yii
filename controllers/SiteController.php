@@ -31,17 +31,22 @@ class SiteController extends Controller
     /**
      * {@inheritdoc}
      */
-    public function behaviors(): array
+        public function behaviors()
     {
         return [
             'access' => [
                 'class' => AccessControl::class,
-                'only' => ['logout'],
+                'only' => ['logout', 'signup'],
                 'rules' => [
+                    [
+                        'actions' => ['signup'],
+                        'allow' => true,
+                        'roles' => ['?'], // sirf guest (not logged in) users
+                    ],
                     [
                         'actions' => ['logout'],
                         'allow' => true,
-                        'roles' => ['@'],
+                        'roles' => ['@'], // sirf logged-in users
                     ],
                 ],
             ],
@@ -53,10 +58,6 @@ class SiteController extends Controller
             ],
         ];
     }
-
-    /**
-     * {@inheritdoc}
-     */
     public function actions(): array
     {
         return [
@@ -94,9 +95,9 @@ class SiteController extends Controller
 
         $model = new LoginForm($this->security);
 
-        if ($model->load($this->request->post()) && $model->login()) {
-            return $this->goBack();
-        }
+                  if ($model->load(Yii::$app->request->post()) && $model->login()) {
+                return $this->redirect(['profile/index']);
+            }
 
         $model->password = '';
 
@@ -108,6 +109,23 @@ class SiteController extends Controller
      *
      * @return Response
      */
+
+    public function actionSignup()
+    {
+        $model = new \app\models\SignupForm();
+        if ($model->load(Yii::$app->request->post())) {
+            $user = $model->signup();
+            if ($user !== null) {
+                Yii::$app->getSession()->setFlash('success', 'Registration successful! You can now log in.');
+                return $this->redirect(['login']);
+            }
+        }
+
+        return $this->render('signup', [
+            'model' => $model,
+        ]);
+    }
+
     public function actionLogout(): Response
     {
         Yii::$app->user->logout();

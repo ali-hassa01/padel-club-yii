@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 namespace app\models;
 
 use Yii;
@@ -12,14 +10,15 @@ use yii\base\Security;
  * LoginForm is the model behind the login form.
  *
  * @property-read User|null $user
- *
+ */
 class LoginForm extends Model
 {
-    public string $username = '';
-    public string $password = '';
-    public bool $rememberMe = true;
-    private User|null $_user = null;
-    private bool $_userLoaded = false;
+    public $username;
+    public $password;
+    public $rememberMe = true;
+
+    private $_user = false;
+
     public function __construct(private readonly Security $security, $config = [])
     {
         parent::__construct($config);
@@ -47,12 +46,12 @@ class LoginForm extends Model
      * @param string $attribute the attribute currently being validated
      * @param array $params the additional name-value pairs given in the rule
      */
-    public function validatePassword(string $attribute, array|null $params): void
+    public function validatePassword($attribute, $params): void
     {
         if (!$this->hasErrors()) {
             $user = $this->getUser();
 
-            if (!$user || !$this->security->validatePassword($this->password, $user->passwordHash)) {
+            if (!$user || !$user->validatePassword($this->password)) {
                 $this->addError($attribute, 'Incorrect username or password.');
             }
         }
@@ -60,6 +59,7 @@ class LoginForm extends Model
 
     /**
      * Logs in a user using the provided username and password.
+     *
      * @return bool whether the user is logged in successfully
      */
     public function login(): bool
@@ -78,9 +78,8 @@ class LoginForm extends Model
      */
     public function getUser(): User|null
     {
-        if (!$this->_userLoaded) {
+        if ($this->_user === false) {
             $this->_user = User::findByUsername($this->username);
-            $this->_userLoaded = true;
         }
 
         return $this->_user;
